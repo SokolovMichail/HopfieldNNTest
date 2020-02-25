@@ -61,12 +61,11 @@ class HNN:
         self.weights = np.zeros(self.dimensions_weights)
         self.weights_init()
         self.bias = np.fromfunction(b_i_part,dimensions)
-        self.internal_neuron = (np.random.rand(dimensions[0],dimensions[1],dimensions[2],dimensions[3])*2)-1
+        self.internal_neuron = (np.random.rand(dimensions[0],dimensions[1],dimensions[2],dimensions[3]))
         self.output_neurons = (np.vectorize(g))(self.internal_neuron)
 
     def weights_init(self):
         for i in range(self.dimensions[0]):
-            print(1)
             for j in range(self.dimensions[1]):
                 for k in range(self.dimensions[2]):
                     for t in range(self.dimensions[3]):
@@ -75,28 +74,28 @@ class HNN:
                                 for k1 in range(self.dimensions[2]):
                                     for t1 in range(self.dimensions[3]):
                                         self.weights[i,j,k,t,i1,j1,k1,t1] = self.w_i_part(i,j,k,t,i1,j1,k1,t1)
+        print("Init OK")
 
     def run(self,descents,iterations,delta_t):
         for descent in range(descents):
             for iteration in range(iterations):
+                print(descent,":",iteration)
                 old_output_neurons = (np.vectorize(g))(self.internal_neuron)
                 self.step(delta_t)
                 self.output_neurons = (np.vectorize(g))(self.internal_neuron)
                 stab = self.calculate_stability(old_output_neurons)
-                if (stab <= 4):
-                    return
-        self.random_flip()
-        self.renormalize()
+                if (stab >=2 and stab <= 5):
+                    break
+            self.random_flip()
+            self.renormalize()
 
     def calculate_stability(self,old_neurons):
         sum = 0
-        for i in range(self.dimensions[0]):
-            for j in range(self.dimensions[1]):
-                for k in range(self.dimensions[2]):
-                    for t in range(self.dimensions[3]):
-                        if old_neurons[i,j,k,t] != self.output_neurons[i,j,k,t]:
-                            sum +=1
-        return sum
+        subtraction = np.subtract(self.output_neurons,old_neurons)
+        np_s = np.nonzero(subtraction)[0]
+        print(np_s)
+        print(len(np_s))
+        return len(np_s)
 
     def step(self,delta_t):
         for i in range(self.dimensions[0]):
@@ -107,10 +106,10 @@ class HNN:
 
 
     def random_flip(self):
-        i = random.randint(0,self.dimensions[0])
-        j = random.randint(0, self.dimensions[1])
-        k = random.randint(0, self.dimensions[2])
-        t = random.randint(0, self.dimensions[3])
+        i = random.randint(0,self.dimensions[0]-1)
+        j = random.randint(0, self.dimensions[1]-1)
+        k = random.randint(0, self.dimensions[2]-1)
+        t = random.randint(0, self.dimensions[3]-1)
         if random.randint(0,1) == 0:
             self.internal_neuron[i,j,k,t] = 0
         else:
@@ -129,7 +128,7 @@ class HNN:
             print("[ {0};{1};{2};{3} ]".format(i_axis[i],j_axis[i],k_axis[i],t_axis[i]))
         print(len(a))
         print(self.dimensions)
-
+        print(self.output_neurons)
 
 dimensions = (2,11,10,24)
 rm = np.zeros((2,11,10))
