@@ -56,23 +56,47 @@ class HNN:
         self.beta = beta
         self.eks = eks
         self.gamma = gamma
-        w_i_part = np.vectorize(partial(weight_initialize,alpha,beta,eks,gamma))
+        self.w_i_part = partial(weight_initialize,alpha,beta,eks,gamma)
         b_i_part = np.vectorize(partial(bias_initialize,alpha,self.R_matr))
-        self.weights = np.fromfunction(w_i_part, self.dimensions_weights)
+        self.weights = np.zeros(self.dimensions_weights)
+        self.weights_init()
         self.bias = np.fromfunction(b_i_part,dimensions)
-        self.internal_neuron = np.random.rand(dimensions[0],dimensions[1],dimensions[2],dimensions[3])
+        self.internal_neuron = (np.random.rand(dimensions[0],dimensions[1],dimensions[2],dimensions[3])*2)-1
         self.output_neurons = (np.vectorize(g))(self.internal_neuron)
+
+    def weights_init(self):
+        for i in range(self.dimensions[0]):
+            print(1)
+            for j in range(self.dimensions[1]):
+                for k in range(self.dimensions[2]):
+                    for t in range(self.dimensions[3]):
+                        for i1 in range(self.dimensions[0]):
+                            for j1 in range(self.dimensions[1]):
+                                for k1 in range(self.dimensions[2]):
+                                    for t1 in range(self.dimensions[3]):
+                                        self.weights[i,j,k,t,i1,j1,k1,t1] = self.w_i_part(i,j,k,t,i1,j1,k1,t1)
 
     def run(self,descents,iterations,delta_t):
         for descent in range(descents):
             for iteration in range(iterations):
+                old_output_neurons = (np.vectorize(g))(self.internal_neuron)
                 self.step(delta_t)
-                stab = np.sum(self.output_neurons)
-                if (stab > 1):
+                self.output_neurons = (np.vectorize(g))(self.internal_neuron)
+                stab = self.calculate_stability(old_output_neurons)
+                if (stab <= 4):
                     return
         self.random_flip()
         self.renormalize()
 
+    def calculate_stability(self,old_neurons):
+        sum = 0
+        for i in range(self.dimensions[0]):
+            for j in range(self.dimensions[1]):
+                for k in range(self.dimensions[2]):
+                    for t in range(self.dimensions[3]):
+                        if old_neurons[i,j,k,t] != self.output_neurons[i,j,k,t]:
+                            sum +=1
+        return sum
 
     def step(self,delta_t):
         for i in range(self.dimensions[0]):
@@ -87,10 +111,24 @@ class HNN:
         j = random.randint(0, self.dimensions[1])
         k = random.randint(0, self.dimensions[2])
         t = random.randint(0, self.dimensions[3])
-        self.internal_neuron[i,j,k,t]*=-1
+        if random.randint(0,1) == 0:
+            self.internal_neuron[i,j,k,t] = 0
+        else:
+            self.internal_neuron[i,j,k,t] = 1
 
     def renormalize(self):
         self.internal_neuron = np.vectorize(g)(self.internal_neuron)
+
+    def print_result(self):
+        a =  np.nonzero(self.output_neurons)
+        i_axis = a[0]
+        j_axis = a[1]
+        k_axis = a[2]
+        t_axis = a[3]
+        for i in range(len(a[0])):
+            print("[ {0};{1};{2};{3} ]".format(i_axis[i],j_axis[i],k_axis[i],t_axis[i]))
+        print(len(a))
+        print(self.dimensions)
 
 
 dimensions = (2,11,10,24)
@@ -128,13 +166,14 @@ rm[1,10,7] = 1
 # rm[2,10,9] = 1
 # rm[2,7,6] = 1
 # rm[2,2,8] =1
-
-network = HNN(dimensions,rm,0.2,0.1,0.1,0.1)
 now = time.time()
-network.run(2,5,0.1)
+network = HNN(dimensions,rm,0.2,0.1,0.1,0.1)
+network.run(4,10,0.1)
 after = time.time()
 print(after - now)
-print(network.output_neurons)
+network.print_result()
+
+
 
 
 
