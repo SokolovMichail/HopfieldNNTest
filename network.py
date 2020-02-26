@@ -10,32 +10,21 @@ def kroneker_delta(i1,i2):
         return 0
 
 def g(x):
-    if (x > 0):
+    if (x >= 0):
         return 1
     else:
         return 0
 
 def weight_initialize(alpha,beta,eks,gamma,i,j,k,l,i_s,j_s,k_s,l_s):
-        a = ((alpha)
-                * kroneker_delta(i,i_s)
-                * kroneker_delta(j,j_s)
-                * kroneker_delta(k,k_s)) - \
-               (beta *
-                kroneker_delta(i,i_s) *
-                (1 - kroneker_delta(j,j_s)) *
-                (1-kroneker_delta(k,k_s) *
-                 kroneker_delta(l,l_s))) - \
-               (eks *
-                (1-kroneker_delta(i,i_s))
-                * kroneker_delta(j,j_s)
-                * (1-kroneker_delta(k,k_s)
-                * kroneker_delta(l,l_s))) - \
-               (gamma *
-                (1-kroneker_delta(i,i_s)) *
-                (1-kroneker_delta(j,j_s) *
-                 kroneker_delta(k,k_s) *
-                 kroneker_delta(l,l_s)))
-        return a
+    k_d_i = kroneker_delta(i,i_s)
+    k_d_j = kroneker_delta(j, j_s)
+    k_d_k = kroneker_delta(k,k_s)
+    k_d_l = kroneker_delta(l,l_s)
+    a = -((alpha)* k_d_i* k_d_j * k_d_k) - \
+        (beta * k_d_i * (1 - k_d_j) * (1-k_d_k) * k_d_l) - \
+        (eks * (1- k_d_i) * k_d_j* (1-k_d_k) * k_d_l) - \
+        (gamma * (1-k_d_i) * (1-k_d_j) * k_d_k * k_d_l)
+    return a
 
 def bias_initialize(alpha,R_matr,i,j,k,l):
     i = int(i)
@@ -61,7 +50,7 @@ class HNN:
         self.weights = np.zeros(self.dimensions_weights)
         self.weights_init()
         self.bias = np.fromfunction(b_i_part,dimensions)
-        self.internal_neuron = (np.random.rand(dimensions[0],dimensions[1],dimensions[2],dimensions[3]))
+        self.internal_neuron = (np.random.rand(dimensions[0],dimensions[1],dimensions[2],dimensions[3]))*2 -1
         self.output_neurons = (np.vectorize(g))(self.internal_neuron)
 
     def weights_init(self):
@@ -84,7 +73,7 @@ class HNN:
                 self.step(delta_t)
                 self.output_neurons = (np.vectorize(g))(self.internal_neuron)
                 stab = self.calculate_stability(old_output_neurons)
-                if (stab >=2 and stab <= 5):
+                if stab <= 4:
                     break
             self.random_flip()
             self.renormalize()
@@ -119,7 +108,7 @@ class HNN:
         self.internal_neuron = np.vectorize(g)(self.internal_neuron)
 
     def print_result(self):
-        a =  np.nonzero(self.output_neurons)
+        a = np.nonzero(self.output_neurons)
         i_axis = a[0]
         j_axis = a[1]
         k_axis = a[2]
@@ -130,8 +119,8 @@ class HNN:
         print(self.dimensions)
         print(self.output_neurons)
 
-dimensions = (2,11,10,24)
-rm = np.zeros((2,11,10))
+dimensions = (1,11,10,12)
+rm = np.zeros((1,11,10))
 #7 gr
 rm[0,0,1] = 3
 rm[0,4,1] = 1
@@ -142,6 +131,14 @@ rm[0,2,7] = 1
 rm[0,10,9] = 1
 rm[0,10,8] = 1
 rm[0,2,0] = 1
+
+now = time.time()
+network = HNN(dimensions,rm,0.2,0.1,0.1,0.1)
+network.run(4,10,0.1)
+after = time.time()
+print(after - now)
+network.print_result()
+'''
 #8gr
 rm[1,2,0] = 1
 rm[1,0,1] = 2
@@ -154,24 +151,18 @@ rm[1,10,9] = 1
 rm[1,9,7] = 1
 rm[1,10,7] = 1
 # #9gr
-# rm[2,2,1] = 1
-# rm[2,0,1] = 1
-# rm[2,3,3] = 1
-# rm[2,0,1] = 1
-# rm[2,4,1] = 1
-# rm[2,7,6] = 1
-# rm[2,8,1] = 2
-# rm[2,2,7] = 1
-# rm[2,10,9] = 1
-# rm[2,7,6] = 1
-# rm[2,2,8] =1
-now = time.time()
-network = HNN(dimensions,rm,0.2,0.1,0.1,0.1)
-network.run(4,10,0.1)
-after = time.time()
-print(after - now)
-network.print_result()
-
+rm[2,2,1] = 1
+rm[2,0,1] = 1
+rm[2,3,3] = 1
+rm[2,0,1] = 1
+rm[2,4,1] = 1
+rm[2,7,6] = 1
+rm[2,8,1] = 2
+rm[2,2,7] = 1
+rm[2,10,9] = 1
+rm[2,7,6] = 1
+rm[2,2,8] =1
+'''
 
 
 
