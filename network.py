@@ -15,6 +15,8 @@ def g(x):
     else:
         return 0
 
+
+
 def weight_initialize(alpha,beta,eks,gamma,i,j,k,l,i_s,j_s,k_s,l_s):
     k_d_i = kroneker_delta(i,i_s)
     k_d_j = kroneker_delta(j, j_s)
@@ -52,7 +54,7 @@ class HNN:
             for j in range(self.dimensions[1]):
                 for k in range(self.dimensions[2]):
                     for t in range(self.dimensions[3]):
-                        self.bias[i,j,k,t] = self.R_matr[i,j,k] / 6
+                        self.bias[i,j,k,t] = self.R_matr[i,j,k] * self.alpha
 
     def weights_init(self):
         for i in range(self.dimensions[0]):
@@ -74,16 +76,15 @@ class HNN:
                 self.step(delta_t)
                 self.output_neurons = self.g_vectorized(self.internal_neuron)
                 stab = self.calculate_stability(old_output_neurons)
-                if (stab <= 20):
+                if (stab <= 4):
                     break
             self.random_flip()
-            self.renormalize()
+            #self.renormalize()
 
     def calculate_stability(self,old_neurons):
-        sum = 0
         subtraction = np.subtract(self.output_neurons,old_neurons)
         np_s = np.nonzero(subtraction)[0]
-        print(np_s)
+        #print(np_s)
         print(len(np_s))
         return len(np_s)
 
@@ -101,10 +102,13 @@ class HNN:
         j = random.randint(0, self.dimensions[1]-1)
         k = random.randint(0, self.dimensions[2]-1)
         t = random.randint(0, self.dimensions[3]-1)
-        self.internal_neuron[i,j,k,t] = abs(self.internal_neuron[i,j,k,t]-1)
+        if random.randint(0,1) == 1:
+            self.output_neurons[i,j,k,t] = 1
+        else:
+            self.output_neurons[i,j,k,t] = 0
 
     def renormalize(self):
-        self.internal_neuron = np.vectorize(g)(self.internal_neuron)
+        self.internal_neuron = self.g_vectorized(self.internal_neuron)
 
     def print_result(self):
         print("Result:")
@@ -116,7 +120,7 @@ class HNN:
         t_axis = a[3]
         for i in range(len(a[0])):
             print("[ {0};{1};{2};{3} ]".format(i_axis[i],j_axis[i],k_axis[i],t_axis[i]))
-        print(self.output_neurons)
+        #print(self.output_neurons)
 
 dimensions = (4,4,4,15)
 rm = np.zeros((4,4,4))
@@ -137,6 +141,8 @@ rm[1,3,3] = 2
 rm[2,2,3] = 1
 rm[3,3,3] = 1
 #
+random.seed(0)
+np.random.seed(0)
 now = time.time()
 network = HNN(dimensions,rm,0.2,0.1,0.1,0.1)
 #print(network.bias)
