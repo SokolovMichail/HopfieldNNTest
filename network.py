@@ -84,7 +84,6 @@ class HNN:
     def calculate_stability(self,old_neurons):
         subtraction = np.subtract(self.output_neurons,old_neurons)
         np_s = np.nonzero(subtraction)[0]
-        #print(np_s)
         print(len(np_s))
         return len(np_s)
 
