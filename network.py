@@ -79,7 +79,7 @@ class HNN:
                 if (stab <= 4):
                     break
             self.random_flip()
-            #self.renormalize()
+            self.renormalize()
 
     def calculate_stability(self,old_neurons):
         subtraction = np.subtract(self.output_neurons,old_neurons)
@@ -129,15 +129,15 @@ rm[0,2,0] = 1
 rm[1,2,0] = 1
 rm[2,0,0] = 1
 rm[3,1,0] = 1
-rm[0,1,1] = 2
+rm[0,1,1] = 1
 rm[1,0,1] = 1
 rm[1,3,1] = 1
 rm[2,0,2] = 1
-rm[2,1,2] = 2
+rm[2,1,2] = 1
 rm[3,1,2] = 1
 rm[3,3,2] = 1
-rm[0,0,3] = 2
-rm[1,3,3] = 2
+rm[0,0,3] = 1
+rm[1,3,3] = 1
 rm[2,2,3] = 1
 rm[3,3,3] = 1
 #
