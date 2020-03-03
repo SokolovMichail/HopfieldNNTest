@@ -44,7 +44,7 @@ class HNN:
         self.weights_init()
         self.bias = np.zeros(self.dimensions)
         self.bias_initialize()
-        self.internal_neuron = (np.random.rand(dimensions[0],dimensions[1],dimensions[2],dimensions[3]))
+        self.internal_neuron = (np.random.random_sample(self.dimensions))
         self.output_neurons = self.g_vectorized(self.internal_neuron)
 
     def bias_initialize(self):
@@ -52,7 +52,7 @@ class HNN:
             for j in range(self.dimensions[1]):
                 for k in range(self.dimensions[2]):
                     for t in range(self.dimensions[3]):
-                        self.bias[i,j,k,t] = self.R_matr[i,j,k] / 6
+                        self.bias[i,j,k,t] = self.R_matr[i,j,k] * self.alpha
 
     def weights_init(self):
         for i in range(self.dimensions[0]):
@@ -70,9 +70,8 @@ class HNN:
         for descent in range(descents):
             for iteration in range(iterations):
                 print(descent,":",iteration)
-                old_output_neurons = self.output_neurons
+                old_output_neurons = self.output_neurons.copy()
                 self.step(delta_t)
-                self.output_neurons = self.g_vectorized(self.internal_neuron)
                 stab = self.calculate_stability(old_output_neurons)
                 if (stab <= 20):
                     break
@@ -92,8 +91,14 @@ class HNN:
             for j in range(self.dimensions[1]):
                 for k in range(self.dimensions[2]):
                     for t in range(self.dimensions[3]):
-                        self.internal_neuron[i,j,k,t] += delta_t * (np.sum(self.weights,(4,5,6,7))[i,j,k,t] * self.output_neurons[i,j,k,t]
-                                                                    + self.bias[i,j,k,t])
+                        sum = 0
+                        for i1 in range(self.dimensions[0]):
+                            for j1 in range(self.dimensions[1]):
+                                for k1 in range(self.dimensions[2]):
+                                    for t1 in range(self.dimensions[3]):
+                                        sum += self.weights[i,j,k,t,i1,j1,k1,t1] * self.output_neurons[i1,j1,k1,t1]
+                        self.internal_neuron[i,j,k,t] += delta_t * (sum + self.bias[i,j,k,t])
+                        self.output_neurons[i,j,k,t] = g(self.internal_neuron[i,j,k,t])
 
 
     def random_flip(self):
@@ -124,18 +129,18 @@ rm = np.zeros((4,4,4))
 rm[0,2,0] = 1
 rm[1,2,0] = 1
 rm[2,0,0] = 1
-rm[3,1,0] = 1
-rm[0,1,1] = 2
-rm[1,0,1] = 1
-rm[1,3,1] = 1
-rm[2,0,2] = 1
-rm[2,1,2] = 2
-rm[3,1,2] = 1
-rm[3,3,2] = 1
+#rm[3,1,0] = 1
+#rm[0,1,1] = 2
+#rm[1,0,1] = 1
+#rm[1,3,1] = 1
+#rm[2,0,2] = 1
+#rm[2,1,2] = 2
+#rm[3,1,2] = 1
+#rm[3,3,2] = 1
 rm[0,0,3] = 2
-rm[1,3,3] = 2
-rm[2,2,3] = 1
-rm[3,3,3] = 1
+#rm[1,3,3] = 2
+#rm[2,2,3] = 1
+#rm[3,3,3] = 1
 #
 now = time.time()
 network = HNN(dimensions,rm,0.2,0.1,0.1,0.1)
