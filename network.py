@@ -15,8 +15,6 @@ def g(x):
     else:
         return 0
 
-
-
 def weight_initialize(alpha,beta,eks,gamma,i,j,k,l,i_s,j_s,k_s,l_s):
     k_d_i = kroneker_delta(i,i_s)
     k_d_j = kroneker_delta(j, j_s)
@@ -46,7 +44,7 @@ class HNN:
         self.weights_init()
         self.bias = np.zeros(self.dimensions)
         self.bias_initialize()
-        self.internal_neuron = (np.random.rand(dimensions[0],dimensions[1],dimensions[2],dimensions[3]))
+        self.internal_neuron = (np.random.random_sample(self.dimensions))
         self.output_neurons = self.g_vectorized(self.internal_neuron)
 
     def bias_initialize(self):
@@ -72,18 +70,19 @@ class HNN:
         for descent in range(descents):
             for iteration in range(iterations):
                 print(descent,":",iteration)
-                old_output_neurons = self.output_neurons
+                old_output_neurons = self.output_neurons.copy()
                 self.step(delta_t)
-                self.output_neurons = self.g_vectorized(self.internal_neuron)
                 stab = self.calculate_stability(old_output_neurons)
-                if (stab <= 4):
+                if (stab <= 20):
                     break
             self.random_flip()
             self.renormalize()
 
     def calculate_stability(self,old_neurons):
+        sum = 0
         subtraction = np.subtract(self.output_neurons,old_neurons)
         np_s = np.nonzero(subtraction)[0]
+        print(np_s)
         print(len(np_s))
         return len(np_s)
 
@@ -92,8 +91,14 @@ class HNN:
             for j in range(self.dimensions[1]):
                 for k in range(self.dimensions[2]):
                     for t in range(self.dimensions[3]):
-                        self.internal_neuron[i,j,k,t] += delta_t * (np.sum(self.weights,(4,5,6,7))[i,j,k,t] * self.output_neurons[i,j,k,t]
-                                                                    + self.bias[i,j,k,t])
+                        sum = 0
+                        for i1 in range(self.dimensions[0]):
+                            for j1 in range(self.dimensions[1]):
+                                for k1 in range(self.dimensions[2]):
+                                    for t1 in range(self.dimensions[3]):
+                                        sum += self.weights[i,j,k,t,i1,j1,k1,t1] * self.output_neurons[i1,j1,k1,t1]
+                        self.internal_neuron[i,j,k,t] += delta_t * (sum + self.bias[i,j,k,t])
+                        self.output_neurons[i,j,k,t] = g(self.internal_neuron[i,j,k,t])
 
 
     def random_flip(self):
@@ -101,13 +106,10 @@ class HNN:
         j = random.randint(0, self.dimensions[1]-1)
         k = random.randint(0, self.dimensions[2]-1)
         t = random.randint(0, self.dimensions[3]-1)
-        if random.randint(0,1) == 1:
-            self.output_neurons[i,j,k,t] = 1
-        else:
-            self.output_neurons[i,j,k,t] = 0
+        self.internal_neuron[i,j,k,t] = abs(self.internal_neuron[i,j,k,t]-1)
 
     def renormalize(self):
-        self.internal_neuron = self.g_vectorized(self.internal_neuron)
+        self.internal_neuron = np.vectorize(g)(self.internal_neuron)
 
     def print_result(self):
         print("Result:")
@@ -119,7 +121,7 @@ class HNN:
         t_axis = a[3]
         for i in range(len(a[0])):
             print("[ {0};{1};{2};{3} ]".format(i_axis[i],j_axis[i],k_axis[i],t_axis[i]))
-        #print(self.output_neurons)
+        print(self.output_neurons)
 
 dimensions = (4,4,4,15)
 rm = np.zeros((4,4,4))
@@ -127,21 +129,19 @@ rm = np.zeros((4,4,4))
 rm[0,2,0] = 1
 rm[1,2,0] = 1
 rm[2,0,0] = 1
-rm[3,1,0] = 1
-rm[0,1,1] = 1
-rm[1,0,1] = 1
-rm[1,3,1] = 1
-rm[2,0,2] = 1
-rm[2,1,2] = 1
-rm[3,1,2] = 1
-rm[3,3,2] = 1
-rm[0,0,3] = 1
-rm[1,3,3] = 1
-rm[2,2,3] = 1
-rm[3,3,3] = 1
+#rm[3,1,0] = 1
+#rm[0,1,1] = 2
+#rm[1,0,1] = 1
+#rm[1,3,1] = 1
+#rm[2,0,2] = 1
+#rm[2,1,2] = 2
+#rm[3,1,2] = 1
+#rm[3,3,2] = 1
+rm[0,0,3] = 2
+#rm[1,3,3] = 2
+#rm[2,2,3] = 1
+#rm[3,3,3] = 1
 #
-random.seed(0)
-np.random.seed(0)
 now = time.time()
 network = HNN(dimensions,rm,0.2,0.1,0.1,0.1)
 #print(network.bias)
