@@ -72,17 +72,19 @@ class HNN:
                 print(descent,":",iteration)
                 old_output_neurons = self.output_neurons.copy()
                 self.step(delta_t)
-                stab = self.calculate_stability(old_output_neurons)
-                if (stab <= 20):
-                    break
-            self.random_flip()
-            self.renormalize()
+               # self.output_neurons = self.g_vectorized(self.output_neurons)
+                #stab = self.calculate_stability(old_output_neurons)
+                #if (stab < 4):
+                #    break
+            if (False):#(descent != descents -1):
+                self.random_flip()
+                self.renormalize()
 
     def calculate_stability(self,old_neurons):
         sum = 0
         subtraction = np.subtract(self.output_neurons,old_neurons)
         np_s = np.nonzero(subtraction)[0]
-        print(np_s)
+        #print(np_s)
         print(len(np_s))
         return len(np_s)
 
@@ -121,33 +123,35 @@ class HNN:
         t_axis = a[3]
         for i in range(len(a[0])):
             print("[ {0};{1};{2};{3} ]".format(i_axis[i],j_axis[i],k_axis[i],t_axis[i]))
-        print(self.output_neurons)
+        return(len(i_axis))
+#        print(self.output_neurons)
 
-dimensions = (4,4,4,15)
+dimensions = (4,4,4,6)
 rm = np.zeros((4,4,4))
 #Initialize R - matrix
-rm[0,2,0] = 1
-rm[1,2,0] = 1
-rm[2,0,0] = 1
-#rm[3,1,0] = 1
-#rm[0,1,1] = 2
-#rm[1,0,1] = 1
-#rm[1,3,1] = 1
-#rm[2,0,2] = 1
-#rm[2,1,2] = 2
-#rm[3,1,2] = 1
-#rm[3,3,2] = 1
-rm[0,0,3] = 2
-#rm[1,3,3] = 2
-#rm[2,2,3] = 1
-#rm[3,3,3] = 1
+rm[0,0,0] = 1
+rm[0,0,2] = 1
+rm[0,2,1] = 1
+rm[1,1,1] = 1
+rm[1,2,0] = 2
+rm[2,2,2] = 1
+rm[2,3,1] = 1
+rm[2,3,2] = 1
+rm[3,3,3] = 1
+rm[3,0,2] = 1
+
+
 #
+sum = 0
+
 now = time.time()
-network = HNN(dimensions,rm,0.2,0.1,0.1,0.1)
-#print(network.bias)
+network = HNN(dimensions,rm,0.4,0.1,0.1,0.1)
+    #print(network.bias)
 network.run(4,10,0.1)
 after = time.time()
 print(after - now)
-network.print_result()
+sum += network.print_result()
+print("FIN")
+#print((sum / 1100))
 
 
