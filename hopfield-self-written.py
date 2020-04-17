@@ -72,13 +72,12 @@ class HNN:
                 print(descent,":",iteration)
                 old_output_neurons = self.output_neurons.copy()
                 self.step(delta_t)
-               # self.output_neurons = self.g_vectorized(self.output_neurons)
-                #stab = self.calculate_stability(old_output_neurons)
-                #if (stab < 4):
-                #    break
-            if (False):#(descent != descents -1):
-                self.random_flip()
-                self.renormalize()
+                self.output_neurons = self.g_vectorized(self.output_neurons)
+                stab = self.calculate_stability(old_output_neurons)
+                if (stab < 4):
+                    break
+            self.random_flip()
+            self.renormalize()
 
     def calculate_stability(self,old_neurons):
         sum = 0
