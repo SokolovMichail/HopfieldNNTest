@@ -4,17 +4,17 @@ class HNN_TF:
     """
     A Hopfield network.
     """
-    def __init__(self, num_units, scope='hopfield'):
+    def __init__(self, num_units, weights,thresholds, scope='hopfield'):
         # pylint: disable=E1129
         with tf.variable_scope(scope):
             self._weights = tf.get_variable('weights',
                                             shape=(num_units, num_units),
                                             dtype=tf.float32,
-                                            initializer=tf.zeros_initializer())
+                                            initial_value = weights)
             self._thresholds = tf.get_variable('thresholds',
                                                shape=(num_units,),
                                                dtype=tf.float32,
-                                               initializer=tf.zeros_initializer())
+                                               initial_value = thresholds)
 
     @property
     def weights(self):
@@ -53,3 +53,11 @@ class HNN_TF:
         if len(states.get_shape()) == 1:
             return result[0]
         return result
+
+    def run(self, descents, iterations, delta_t):
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            input_ph = tf.placeholder(tf.bool, shape=384,)
+            converged = self.step(self.step(input_ph))
+            print(sess.run(converged, feed_dict={input_ph: [True] + [False] * 5}))
+            print(sess.run(converged, feed_dict={input_ph: [False] * 5 + [True]}))

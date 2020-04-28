@@ -2,7 +2,8 @@ import numpy as np
 from functools import partial
 import time
 import random
-
+from hopfield_tf import HNN_TF
+import tensorflow as tf
 def kroneker_delta(i1,i2):
     if (i1 == i2):
         return 1
@@ -138,19 +139,22 @@ rm[2,3,1] = 1
 rm[2,3,2] = 1
 rm[3,3,3] = 1
 rm[3,0,2] = 1
-
-
 #
-sum = 0
+
 
 now = time.time()
 network = HNN(dimensions,rm,0.4,0.1,0.1,0.1)
+weight_flattened = network.weights.reshape(shape = (384,384))
+bias_flattened = network.bias.flatten()
+network_tf = HNN_TF(384,weight_flattened,bias_flattened)
     #print(network.bias)
-network.run(4,10,0.1)
-after = time.time()
-print(after - now)
-sum += network.print_result()
-print("FIN")
+#network.run(4,10,0.1)
+#after = time.time()
+#print(after - now)
+#print("Fin for HNN self-written")
 #print((sum / 1100))
+network_tf.run(0,0,0)
+
+
 
 

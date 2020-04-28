@@ -38,11 +38,12 @@ def load_files():
 
 interface_lists, dictionaries = load_files()
 
+
+
 layout = [
     [psg.Radio("Самописная нейронная сеть Хопфилда","GROUP_ALGORITHM")],
     [psg.Radio("Генетический алгоритм", "GROUP_ALGORITHM")],
     [psg.Radio("Нейронная сеть Хопфилда на базе TensorFlow","GROUP_ALGORITHM")],
-    [psg.Radio("Алгоритм на основе предпочтений преподавателей","GROUP_ALGORITHM")],
     [psg.Text('Преподаватели'),psg.Text('Аудитории'),psg.Text('Учебные группы')],
     [psg.Listbox(interface_lists[0]),psg.Listbox(interface_lists[1]),psg.Listbox(interface_lists[2])],
     [psg.Submit("Запустить")],
@@ -51,6 +52,7 @@ layout = [
 ]
 
 window = psg.Window('Curricula_Generator', layout)
+
 while True:                             # The Event Loop
     event, values = window.read()
     # print(event, values) #debug
