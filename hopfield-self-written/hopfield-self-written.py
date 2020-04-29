@@ -2,8 +2,8 @@ import numpy as np
 from functools import partial
 import time
 import random
-from hopfield_tf import HNN_TF
-import tensorflow as tf
+
+
 def kroneker_delta(i1,i2):
     if (i1 == i2):
         return 1
@@ -126,7 +126,7 @@ class HNN:
         return(len(i_axis))
 #        print(self.output_neurons)
 
-dimensions = (4,4,4,6)
+dimensions = (20,4,4,20)
 rm = np.zeros((4,4,4))
 #Initialize R - matrix
 rm[0,0,0] = 1
@@ -144,16 +144,16 @@ rm[3,0,2] = 1
 
 now = time.time()
 network = HNN(dimensions,rm,0.4,0.1,0.1,0.1)
-weight_flattened = network.weights.reshape(shape = (384,384))
-bias_flattened = network.bias.flatten()
-network_tf = HNN_TF(384,weight_flattened,bias_flattened)
+#weight_flattened = network.weights.reshape((384,384))
+#bias_flattened = network.bias.flatten()
+#network_tf = HNN_TF(384,weight_flattened,bias_flattened)
     #print(network.bias)
-#network.run(4,10,0.1)
-#after = time.time()
-#print(after - now)
-#print("Fin for HNN self-written")
+network.run(4,10,0.1)
+after = time.time()
+print(after - now)
+print("Fin for HNN self-written")
 #print((sum / 1100))
-network_tf.run(0,0,0)
+#network_tf.run(0,0,0)
 
 
 
