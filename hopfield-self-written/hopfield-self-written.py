@@ -126,8 +126,8 @@ class HNN:
         return(len(i_axis))
 #        print(self.output_neurons)
 
-dimensions = (20,4,4,20)
-rm = np.zeros((4,4,4))
+dimensions = (20,20,8,6)
+rm = np.zeros((20,20,8))
 #Initialize R - matrix
 rm[0,0,0] = 1
 rm[0,0,2] = 1
